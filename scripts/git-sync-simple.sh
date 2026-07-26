@@ -65,8 +65,10 @@ push_with_token() {
   local token_file="$HOME/.config/simple-hermes/github-token"
   local repo_path
   local https_url
-  local token_prefix
-  local auth_header
+  local basic_payload
+  local basic_auth
+  local encoded_token
+  local ask_url
 
   if [[ -z "$token" && -f "$token_file" ]]; then
     token="$(sed -E 's/[\r\n]+$//' "$token_file" | tr -d '[:space:]')"
@@ -82,13 +84,28 @@ push_with_token() {
   fi
 
   https_url="https://github.com/${repo_path}.git"
-  token_prefix='AUTHORIZATION:'
-  auth_header="${token_prefix} bearer ${token}"
 
-  log_info "토큰 기반 push 시도 (매회 입력 불필요)"
-  if git -C "$REPO_ROOT" -c "http.extraheader=$auth_header" push "$https_url" "$branch"; then
+  log_info "토큰 기반 push 시도 (Authorization: Basic 헤더)"
+  basic_payload="x-access-token:${token}"
+  basic_auth="$(printf '%s' "$basic_payload" | base64 | tr -d '\n')"
+  if git -C "$REPO_ROOT" -c "http.extraheader=Authorization: Basic ${basic_auth}" push "$https_url" "$branch"; then
     return 0
   fi
+
+  log_info "토큰 기반 push 시도 (임시 URL 임베드)"
+  if command -v python3 >/dev/null 2>&1; then
+    encoded_token="$(python3 - "$token" <<'PY'
+import urllib.parse
+import sys
+print(urllib.parse.quote(sys.argv[1], safe=''))
+PY
+)"
+    ask_url="https://x-access-token:${encoded_token}@github.com/${repo_path}.git"
+    if GIT_TERMINAL_PROMPT=0 git -C "$REPO_ROOT" push "$ask_url" "$branch"; then
+      return 0
+    fi
+  fi
+
   return 1
 }
 
