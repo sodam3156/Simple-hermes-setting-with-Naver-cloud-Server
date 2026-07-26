@@ -86,8 +86,10 @@ push_with_token() {
   auth_header="${token_prefix} bearer ${token}"
 
   log_info "토큰 기반 push 시도 (매회 입력 불필요)"
-  git -C "$REPO_ROOT" -c "http.extraheader=$auth_header" push "$https_url" "$branch"
-  return 0
+  if git -C "$REPO_ROOT" -c "http.extraheader=$auth_header" push "$https_url" "$branch"; then
+    return 0
+  fi
+  return 1
 }
 
 push_with_https_credential() {
