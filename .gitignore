@@ -1,0 +1,9 @@
+# Secrets
+*.env
+*.env.*
+
+# Runtime/credential files
+node_modules/
+
+
+!templates/*.env.example
