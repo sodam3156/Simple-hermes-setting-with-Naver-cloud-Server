@@ -21,6 +21,7 @@
 
 - `README.md`: 이 파일 (빠른 진입점)
 - `docs/`: 단계별 가이드
+  - `00-처음-시작자-일괄-설정-가이드.md`
   - `01-서버-준비-및-초기-접속.md`
   - `02-Hermes-설치와-프로필-구성.md`
   - `03-Telegram-봇-생성-및-채널-연동.md`
@@ -41,41 +42,14 @@
 
 ---
 
-## 한눈에 실행 순서
+## 한 번에 시작하는 전체 플로우
 
-```bash
-# 1) 서버 접속 후 기본 업데이트
-sudo apt update && sudo apt install -y git curl
+초보자도 아래 한 문서만 따라오면 됩니다.
 
-# 2) Hermes 설치
-curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash
-source ~/.bashrc
-hermes --version
+- `docs/00-처음-시작자-일괄-설정-가이드.md` (가장 먼저 읽기)
 
-# 3) 저장소에서 템플릿 가져오기
-cd /tmp
-git clone https://github.com/sodam3156/Simple-hermes-setting-with-Naver-cloud-Server.git
-cd Simple-hermes-setting-with-Naver-cloud-Server
-
-# 4) datest 자동 설정(대화형 일부 입력)
-chmod +x scripts/bootstrap-datest.sh
-# 필요한 값 입력
-./scripts/bootstrap-datest.sh
-
-# 5) cron 4개 등록 후 수동 실행 체크(필수)
-PATH=$HOME/.local/bin:$PATH datest cron create ...
-PATH=$HOME/.local/bin:$PATH datest cron list
-PATH=$HOME/.local/bin:$PATH datest cron run datest-daily-goal
-PATH=$HOME/.local/bin:$PATH datest cron run datest-weekly-goal
-PATH=$HOME/.local/bin:$PATH datest cron run datest-monthly-goal
-PATH=$HOME/.local/bin:$PATH datest cron run datest-2h-schedule
-
-# 6) gateway 실행
-hermes gateway install
-PATH=$HOME/.local/bin:$PATH hermes gateway start
-```
-
-`...` 부분은 아래 문서의 상세 가이드를 그대로 복사해 채워주세요.
+해당 문서에는 **네이버클라우드 인스턴스 생성 → SSH 접속 → Hermes 설치 → Telegram 봇/채널 연동 → datest 프로필/cron 검증 → gateway 실행**까지
+한 번에 확인 가능한 명령 흐름이 들어 있습니다.
 
 ---
 
