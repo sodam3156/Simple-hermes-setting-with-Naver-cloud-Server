@@ -48,13 +48,26 @@ push_with_gh() {
   if command -v gh >/dev/null 2>&1; then
     if gh auth status >/dev/null 2>&1; then
       log_info "gh 인증 감지 -> gh 경로로 push 시도"
-      git -C "$REPO_ROOT" push "$REMOTE" "$branch"
-      return 0
+      if git -C "$REPO_ROOT" push "$REMOTE" "$branch"; then
+        return 0
+      fi
     fi
   fi
   return 1
 }
 
+push_with_remote_ssh() {
+  local branch="${1}"
+  local remote_url
+  remote_url="$(git -C "$REPO_ROOT" remote get-url "$REMOTE")"
+
+  if [[ "$remote_url" != git@* ]]; then
+    return 1
+  fi
+
+  log_info "SSH remote로 push 시도: $remote_url"
+  GIT_TERMINAL_PROMPT=0 git -C "$REPO_ROOT" push "$REMOTE" "$branch"
+}
 push_with_token() {
   local branch="${1}"
   local token="${GIT_PUSH_TOKEN:-${GITHUB_TOKEN:-${GH_TOKEN:-}}}"
@@ -115,6 +128,11 @@ push_with_https_credential() {
 require_remote
 
 log_info "원격 동기화 시작: $(git -C "$REPO_ROOT" remote get-url "$REMOTE")"
+
+if push_with_remote_ssh "$BRANCH"; then
+  log_info "push 완료"
+  exit 0
+fi
 
 if push_with_gh "$BRANCH"; then
   log_info "push 완료"
